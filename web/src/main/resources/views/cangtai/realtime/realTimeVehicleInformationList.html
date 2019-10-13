@@ -1,0 +1,99 @@
+<% layout('/layouts/default.html', {title: '车辆信息管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text('车辆信息管理')}
+			</div>
+			<div class="box-tools pull-right">
+				<a href="#" class="btn btn-default" id="btnSearch" title="${text('查询')}"><i class="fa fa-filter"></i> ${text('查询')}</a>
+			</div>
+		</div>
+		<div class="box-body">
+
+			<#form:form id="searchForm" model="${realTimeVehicleInformation}" action="${ctx}/realtime/realTimeVehicleInformation/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+				<div class="form-group">
+					<label class="control-label">${text('身份证')}：</label>
+					<div class="control-inline">
+						<#form:input path="idCard" maxlength="25" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('模块编号')}：</label>
+					<div class="control-inline">
+						<#form:input path="moduleNumber" maxlength="50" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('发动机转速')}：</label>
+					<div class="control-inline">
+						<#form:input path="engineSpeed" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('油箱百分比')}：</label>
+					<div class="control-inline">
+						<#form:input path="mailbox" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('用户名')}：</label>
+					<div class="control-inline">
+						<#form:input path="name" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('上传时间')}：</label>
+					<div class="control-inline">
+						<#form:input path="datetime" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label">${text('二氧化碳')}：</label>
+					<div class="control-inline">
+						<#form:input path="carbonDioxide" maxlength="255" class="form-control width-120"/>
+					</div>
+				</div>
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary btn-sm">${text('查询')}</button>
+					<button type="reset" class="btn btn-default btn-sm">${text('重置')}</button>
+				</div>
+			</#form:form>
+			<table id="dataGrid"></table>
+			<div id="dataGridPage"></div>
+		</div>
+	</div>
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text('身份证')}', name:'idCard', index:'idCard', width:150, align:"left"},
+		{header:'${text('模块编号')}', name:'moduleNumber', index:'moduleNumber', width:150, align:"left"},
+		{header:'${text('发动机转速')}', name:'engineSpeed', index:'engineSpeed', width:150, align:"left", formatter: function(val, obj, row, act){
+			return js.formatNumber(val, 0, false, '');
+		}},
+		{header:'${text('油箱百分比')}', name:'mailbox', index:'mailbox', width:150, align:"left"},
+		{header:'${text('经度')}', name:'position.0', index:'position.0', width:150, align:"left"},
+		{header:'${text('纬度')}', name:'position.1', index:'position.1', width:150, align:"left"},
+		{header:'${text('用户名')}', name:'name', index:'name', width:150, align:"left"},
+		{header:'${text('上传时间')}', name:'datetime', index:'datetime', width:150, align:"center",formatter: function(val, obj, row, act){
+				var date = new Date(val);
+				var month = date.getMonth()+1;
+				var date1 = date.getDate();
+				var hours = date.getHours();
+				var minutes = date.getMinutes();
+				var seconds = date.getSeconds();
+			return month+"月"+date1+"日  "+hours+":"+minutes+":"+seconds;
+			}},
+		{header:'${text('二氧化碳')}', name:'carbonDioxide', index:'carbonDioxide', width:150, align:"left"}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>

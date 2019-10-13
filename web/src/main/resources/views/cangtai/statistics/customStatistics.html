@@ -1,0 +1,175 @@
+<% layout('/layouts/default.html', {title: '自定义统计', libs: ['validate'], bodyClass: ''}){ %>
+<div class="main-content">
+    <div class="box box-main">
+        <div class="box-header with-border">
+            <div class="box-title">
+                <i class="fa icon-book-open"></i> 自定义统计
+            </div>
+            <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+            </div>
+        </div>
+        <div class="box-body">
+            <#form:form
+            action="${ctx}/statistics/customStatisticsController/list" method="post" mode="queryCriteria">
+            <div class="row">
+                <div class="col-xs-12 col-md-6">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">时间</span>
+                            <#form:input type="date" value="${queryCriteria.startTime}" path="startTime" class="form-control"/>
+                            <span class="input-group-addon">到</span>
+                            <#form:input type="date" value="${queryCriteria.endTime}" path="endTime" class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-6">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">经度</span>
+                            <#form:input path="startLongitude" value="${queryCriteria.startLongitude}" class="form-control"/>
+                            <span class="input-group-addon">到</span>
+                            <#form:input path="endLongitude" value="${queryCriteria.endLongitude}" class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-6">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">纬度</span>
+                            <#form:input path="startLatitude" value="${queryCriteria.startLatitude}" class="form-control"/>
+                            <span class="input-group-addon">到</span>
+                            <#form:input path="endLatitude" value="${queryCriteria.endLatitude}" class="form-control"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-md-6">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <span class="input-group-addon">搜索方式</span>
+                            <div class="form-control">
+                                <div class="radio-inline">
+                                    <label>
+                                        <#form:input type="radio" path="type" value="1" class="form-control" checked="checked"/> 年
+                                    </label>
+                                </div>
+                                <div class="radio-inline">
+                                    <label>
+                                        <#form:input type="radio" path="type" value="2" class="form-control"/> 月
+                                    </label>
+                                </div>
+                                <div class="radio-inline">
+                                    <label>
+                                        <#form:input type="radio" path="type" value="3" class="form-control"/> 周
+                                    </label>
+                                </div>
+                                <div class="radio-inline">
+                                    <label>
+                                        <#form:input type="radio" path="type" value="4" class="form-control"/> 日
+                                    </label>
+                                </div>
+                                <div class="radio-inline">
+                                    <label>
+                                        <#form:input type="radio" path="type" value="5" class="form-control"/> 时
+                                    </label>
+                                </div>
+
+                            </div>
+                            <span class="input-group-btn">
+                                    <button id="submit" class="btn btn-default" type="button">搜索</button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </#form:form>
+            <div class="row">
+                <div class="col-xs-12">
+                    <div id="echarts"></div>
+                </div>
+            </div>
+        </div>
+        <div class="box-footer" style="height: 40px">
+        </div>
+    </div>
+</div>
+<% } %>
+<script src="/static/common/js/echarts.min.js" type="application/javascript"></script>
+<script type="application/javascript">
+    $(function () {
+        $("#submit").click(function () {
+
+        });
+        var option = {
+            legend: {},
+            tooltip: {
+                trigger: 'axis',
+                showContent: false
+            },
+            dataset: {
+                source: [
+                    ["时间"].concat(${statistics.times}),
+                    ["油耗"].concat(${statistics.oils}),
+                    ["二氧化碳"].concat(${statistics.carbonDioxides}),
+                    ["汽车速度"].concat(${statistics.vehicleSpeeds}),
+                    ["汽车数量"].concat(${statistics.numCarss})
+                ]
+            },
+            xAxis: {type: 'category'},
+            yAxis: {gridIndex: 0},
+            grid: {top: '55%'},
+            series: [
+                {type: 'line', smooth: true, seriesLayoutBy: 'row'},
+                {type: 'line', smooth: true, seriesLayoutBy: 'row'},
+                {type: 'line', smooth: true, seriesLayoutBy: 'row'},
+                {type: 'line', smooth: true, seriesLayoutBy: 'row'},
+                {
+                    type: 'pie',
+                    id: 'pie',
+                    radius: '30%',
+                    center: ['50%', '25%'],
+                    label: {
+                        formatter: '{b}: {@2012} ({d}%)'
+                    },
+                    encode: {
+                        itemName: 'product',
+                        value: '2012',
+                        tooltip: '2012'
+                    }
+                }
+            ]
+        };
+        function chartsInit() {
+            var myChart = echarts.init(document.getElementById('echarts'));
+
+            myChart.on('updateAxisPointer', function (event) {
+                var xAxisInfo = event.axesInfo[0];
+                if (xAxisInfo) {
+                    var dimension = xAxisInfo.value + 1;
+                    myChart.setOption({
+                        series: {
+                            id: 'pie',
+                            label: {
+                                formatter: '{b}: {@[' + dimension + ']} ({d}%)'
+                            },
+                            encode: {
+                                value: dimension,
+                                tooltip: dimension
+                            }
+                        }
+                    });
+                }
+            });
+            myChart.setOption(option);
+        }
+        var height = $(window).height();
+        $("#echarts").height(height-210);
+        chartsInit();
+        $(window).resize(function () {
+            var height = $(window).height();
+            $("#echarts").height(height-210).removeAttr("_echarts_instance_").empty();;
+            chartsInit();
+        });
+    })
+</script>
+

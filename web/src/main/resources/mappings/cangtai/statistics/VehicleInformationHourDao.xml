@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.cangtai.statistics.dao.VehicleInformationHourDao">
+	
+	<select id="findAllVehicleInformation" resultType="VehicleInformationHour" parameterType="top.cangtai.statistics.entity.QueryCriteria">
+		SELECT start_time,num_cars,vehicle_speed,carbon_dioxide,oil FROM vehicle_information_hour
+		<where>
+			<if test="queryCriteria.startTime != null">
+				<![CDATA[AND start_time >= #{queryCriteria.startTime}]]>
+			</if>
+			<if test="queryCriteria.endTime != null">
+				<![CDATA[AND end_time <= #{queryCriteria.endTime}]]>
+			</if>
+			<if test="queryCriteria.startLongitude != null">
+				<![CDATA[AND #{queryCriteria.startLongitude} <= longitude ]]>
+			</if>
+			<if test="queryCriteria.endLongitude != null">
+				<![CDATA[AND #{queryCriteria.endLongitude} >= longitude ]]>
+			</if>
+			<if test="queryCriteria.startLatitude != null">
+				<![CDATA[AND #{queryCriteria.startLatitude} <= latitude ]]>
+			</if>
+			<if test="queryCriteria.endLatitude != null">
+				<![CDATA[AND #{queryCriteria.endLatitude} >= latitude ]]>
+			</if>
+		</where>
+			ORDER BY start_time
+	</select>
+	
+</mapper>

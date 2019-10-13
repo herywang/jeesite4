@@ -1,0 +1,4 @@
+# Project exclude paths
+/common/target/
+/web/src/main/webapp/WEB-INF/classes/
+/web/target/

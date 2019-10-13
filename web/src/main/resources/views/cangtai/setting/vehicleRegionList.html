@@ -1,0 +1,112 @@
+<% layout('/layouts/default.html', {title: '区域设置管理', libs: ['dataGrid']}){ %>
+<div class="main-content">
+	<div class="box box-main">
+		<div class="box-header">
+			<div class="box-title">
+				<i class="fa fa-list-alt"></i> ${text('区域设置管理')}
+			</div>
+		</div>
+		<div class="box-body">
+			<#form:form id="searchForm" model="${vehicleRegion}" action="${ctx}/setting/vehicleRegion/listData" method="post" class="form-inline hide"
+					data-page-no="${parameter.pageNo}" data-page-size="${parameter.pageSize}" data-order-by="${parameter.orderBy}">
+			</#form:form>
+				<div class="row">
+					<div class="col-xs-12 col-md-5">
+						<div style="height: 80px;">
+							<#form:form
+							action="${ctx}/setting/vehicleRegion/list" method="post">
+							<#form:hidden path="longitude" id="longitude"/>
+							<#form:hidden path="latitude" id="latitude" />
+							<div class="form-group">
+								<div class="input-group">
+									<span class="input-group-addon">经纬度</span>
+									<#form:input path="carbonDioxide" maxlength="255" class="form-control required" disabled="disabled" id="longitudeAndLatitude"/>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="input-group">
+									<span class="input-group-addon">半径</span>
+									<#form:input id="radius" step="0.1" path="radius" min="1" type="range" max="20" value="${radius}" class="form-control"/>
+									<span class="input-group-btn">
+											<p id="radius-p" class="btn btn-default">${radius} 里</p>
+											<button class="btn btn-default" type="submit">添加</button>
+									</span>
+								</div>
+							</div>
+							</#form:form>
+						</div>
+						<div id="container"></div>
+					</div>
+				<div class="col-xs-12 col-md-7">
+					<table id="dataGrid"></table>
+					<div id="dataGridPage"></div>
+				</div>
+			</div>
+		</div>
+		<div class="box-footer" style="height:30px"></div>
+	</div>
+
+</div>
+<% } %>
+<script>
+// 初始化DataGrid对象
+$('#dataGrid').dataGrid({
+	searchForm: $("#searchForm"),
+	columnModel: [
+		{header:'${text('经度')}', name:'longitude', index:'longitude', width:150, align:"center", frozen:true},
+		{header:'${text('纬度')}', name:'latitude', index:'latitude', width:150, align:"center"},
+		{header:'${text('半径')}', name:'radius', width:150, align:"center",formatter: function(val, obj, row, act){
+				var k = 0.009;
+			return row.radius/k;
+			}},
+		{header:'${text('创建时间')}', name:'date', index:'date', width:150, align:"center",formatter: function(val, obj, row, act){
+				var date = new Date(val);
+				var month = date.getMonth()+1;
+				var date1 = date.getDate();
+				var hours = date.getHours();
+				var minutes = date.getMinutes();
+				var seconds = date.getSeconds();
+				return month+"月"+date1+"日  "+hours+":"+minutes+":"+seconds;
+			}},
+		{header:'${text('操作')}', name:'actions', width:50, sortable:false,align:"center",title:false, formatter: function(val, obj, row, act){
+			var actions = [];
+			<% if(hasPermi('setting:vehicleRegion:edit')){ %>
+				actions.push('<a href="${ctx}/setting/vehicleRegion/delete?id='+row.id+'" class="btnList" title="${text('删除区域设置')}" data-confirm="${text('确认要删除该区域设置吗？')}"><i class="fa fa-trash-o"></i></a>&nbsp;');
+			<% } %>
+			return actions.join('');
+		}}
+	],
+	// 加载成功后执行事件
+	ajaxSuccess: function(data){
+		
+	}
+});
+</script>
+<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.14&key=a9743b6367888c6073c8793e705239da"></script>
+<script>
+
+	$(function () {
+		var height = $(window).height();
+		$("#container").height(height - 180);
+		$(window).resize(function () {
+			var height = $(window).height();
+			$("#container").height(height - 180);
+		});
+		$("#radius").change(function () {
+			$("#radius-p").html($("#radius").val()+" 里");
+		})
+		$("#longitudeAndLatitude").val("${longitude},${latitude}");
+		$("#longitude").val(${longitude});
+		$("#latitude").val(${latitude});
+	});
+
+	var map = new AMap.Map('container',{
+		center: [${longitude},${latitude}],
+		zoom: 13
+	});
+	map.on('click', function(e) {
+		$("#longitudeAndLatitude").val(e.lnglat.getLng() + ',' + e.lnglat.getLat());
+		$("#longitude").val(e.lnglat.getLng());
+		$("#latitude").val(e.lnglat.getLat());
+	});
+</script>
